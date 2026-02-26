@@ -8,3 +8,14 @@ Thumbs.db
 
 # Other
 *.log
+
+
+# Environment Variables
+.env
+.env.*
+.env.example
+
+# Secrets
+secrets/
+*.pem
+*.key

@@ -1,16 +1,25 @@
-version: '3.8'
-
 services:
   mongodb:
     image: mongo:latest
     container_name: movie-streaming-mongodb
     ports:
-      - "27017:27017"
+      - "${MONGO_PORT}:27017"
     volumes:
       - mongodb_data:/data/db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASS}
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: movie-streaming-mongo-ui
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USER}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASS}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USER}:${MONGO_PASS}@mongodb:27017/?authSource=admin
 
 volumes:
   mongodb_data:
