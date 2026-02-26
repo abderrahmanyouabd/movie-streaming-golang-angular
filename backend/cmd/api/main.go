@@ -7,7 +7,9 @@ import (
 	"os"
 
 	"movie-streaming-backend/internal/config"
+	"movie-streaming-backend/internal/handler"
 	"movie-streaming-backend/internal/repository"
+	"movie-streaming-backend/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,8 +37,16 @@ func main() {
 		}()
 	}
 
+	// Database instance
+	db := client.Database(cfg.DBName)
+
+	// Dependency Injection
+	movieRepo := repository.NewMovieRepository(db)
+	movieService := service.NewMovieService(movieRepo)
+	movieHandler := handler.NewMovieHandler(movieService)
+
 	// Initialize Gin router
-	r := setupRouter()
+	r := setupRouter(movieHandler)
 
 	slog.Info("Server starting", "port", cfg.Port)
 	if err := r.Run(":" + cfg.Port); err != nil {
@@ -45,19 +55,30 @@ func main() {
 	}
 }
 
-func setupRouter() *gin.Engine {
+func setupRouter(movieHandler *handler.MovieHandler) *gin.Engine {
 	r := gin.New()
 
 	// Global middleware
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
 
-	r.GET("/", func(c *gin.Context) {
+	// Routes
+	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"status":  "up",
 			"message": "Movie Streaming API with Gin",
 		})
 	})
+
+	// Movies Group
+	api := r.Group("/api/v1")
+	{
+		movies := api.Group("/movies")
+		{
+			movies.POST("", movieHandler.AddMovie)
+			movies.GET("", movieHandler.GetAllMovies)
+		}
+	}
 
 	return r
 }
