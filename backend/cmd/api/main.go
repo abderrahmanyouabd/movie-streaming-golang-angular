@@ -11,6 +11,7 @@ import (
 	"movie-streaming-backend/internal/repository"
 	"movie-streaming-backend/internal/service"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -61,6 +62,11 @@ func setupRouter(movieHandler *handler.MovieHandler) *gin.Engine {
 	// Global middleware
 	r.Use(gin.Logger())
 	r.Use(gin.Recovery())
+
+	// CORS middleware
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://localhost:4200"}
+	r.Use(cors.New(corsConfig))
 
 	// Routes
 	r.GET("/health", func(c *gin.Context) {
