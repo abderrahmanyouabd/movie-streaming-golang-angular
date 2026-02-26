@@ -10,14 +10,14 @@ import (
 )
 
 func TestHealthCheckRoute(t *testing.T) {
-	// 1. Setup our router
-	router := setupRouter()
+	// 1. Setup our router (we can pass nil for the handler since the health route doesn't use it)
+	router := setupRouter(nil)
 
 	// 2. Create a response recorder (to "catch" the response)
 	w := httptest.NewRecorder()
 
 	// 3. Create a mock request
-	req, _ := http.NewRequest("GET", "/", nil)
+	req, _ := http.NewRequest("GET", "/health", nil)
 
 	// 4. Perform the request
 	router.ServeHTTP(w, req)
